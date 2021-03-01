@@ -3,10 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,22 +18,51 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        int rs = sendUpdate("CREATE TABLE users (id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(20), lastname VARCHAR(20), age TINYINT UNSIGNED)");
+        String query = "CREATE TABLE users (id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(20), lastname VARCHAR(20), age TINYINT UNSIGNED)";
+        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+            Statement statement =  conn.createStatement();
+            statement.executeUpdate(query);
+        } catch (SQLException | ClassNotFoundException exception){
+            System.out.println(exception.getMessage());
+        }
     }
 
     public void dropUsersTable() {
-        int rs = sendUpdate("DROP TABLE users");
+        String query = "DROP TABLE users";
+        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+            Statement statement =  conn.createStatement();
+            statement.executeUpdate(query);
+        } catch (SQLException | ClassNotFoundException exception){
+            System.out.println(exception.getMessage());
+        }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        int rs = sendUpdate("INSERT INTO users (name,lastname,age) VALUES ('"+name+"','"+lastName+"','"+age+"')");
+        int rs = 0;
+        String query = "INSERT INTO users (name,lastname,age) VALUES (?, ?, ?)";
+        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+            PreparedStatement pStatement =  conn.prepareStatement(query);
+            pStatement.setString(1, name);
+            pStatement.setString(2, lastName);
+            pStatement.setByte(3, age);
+            rs = pStatement.executeUpdate();
+        } catch (SQLException | ClassNotFoundException exception){
+            System.out.println(exception.getMessage());
+        }
         if (rs == 1) {
             System.out.printf("User с именем – %s добавлен в базу данных.%n", name);
         }
     }
 
     public void removeUserById(long id) {
-        int rs = sendUpdate("DELETE FROM users WHERE id = "+id+";");
+        String query = "DELETE FROM users WHERE id = ?";
+        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+            PreparedStatement pStatement =  conn.prepareStatement(query);
+            pStatement.setLong(1, id);
+            pStatement.executeUpdate();
+        } catch (SQLException | ClassNotFoundException exception){
+            System.out.println(exception.getMessage());
+        }
     }
 
     public List<User> getAllUsers() {
@@ -56,18 +82,12 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        int rs = sendUpdate("TRUNCATE TABLE users");
-    }
-
-    private int sendUpdate(String query){
-        int res = 0;
+        String query = "TRUNCATE TABLE users";
         try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
             Statement statement =  conn.createStatement();
-            res = statement.executeUpdate(query);
+            statement.executeUpdate(query);
         } catch (SQLException | ClassNotFoundException exception){
             System.out.println(exception.getMessage());
         }
-        return res;
     }
-
 }
