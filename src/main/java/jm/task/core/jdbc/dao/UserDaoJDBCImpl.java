@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private final String dbUserName = "javamentor";
-    private final String dbUserPassword = "javamentor";
-    private final String dbHostName = "mysql";
-    private final String dbName = "preprousers";
 
     public UserDaoJDBCImpl() {
 
@@ -19,7 +15,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void createUsersTable() {
         String query = "CREATE TABLE users (id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(20), lastname VARCHAR(20), age TINYINT UNSIGNED)";
-        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+        try (Connection conn = Util.getConnection()){
             Statement statement =  conn.createStatement();
             statement.executeUpdate(query);
         } catch (SQLException | ClassNotFoundException exception){
@@ -29,7 +25,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
         String query = "DROP TABLE users";
-        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+        try (Connection conn = Util.getConnection()){
             Statement statement =  conn.createStatement();
             statement.executeUpdate(query);
         } catch (SQLException | ClassNotFoundException exception){
@@ -40,7 +36,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         int rs = 0;
         String query = "INSERT INTO users (name,lastname,age) VALUES (?, ?, ?)";
-        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+        try (Connection conn = Util.getConnection()){
             PreparedStatement pStatement =  conn.prepareStatement(query);
             pStatement.setString(1, name);
             pStatement.setString(2, lastName);
@@ -56,7 +52,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         String query = "DELETE FROM users WHERE id = ?";
-        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+        try (Connection conn = Util.getConnection()){
             PreparedStatement pStatement =  conn.prepareStatement(query);
             pStatement.setLong(1, id);
             pStatement.executeUpdate();
@@ -67,7 +63,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+        try (Connection conn = Util.getConnection()){
             Statement statement =  conn.createStatement();
             ResultSet rs = statement.executeQuery("SELECT * FROM users;");
             while (rs.next()){
@@ -83,7 +79,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
         String query = "TRUNCATE TABLE users";
-        try (Connection conn = Util.getConnection(dbHostName, dbName, dbUserName, dbUserPassword)){
+        try (Connection conn = Util.getConnection()){
             Statement statement =  conn.createStatement();
             statement.executeUpdate(query);
         } catch (SQLException | ClassNotFoundException exception){
